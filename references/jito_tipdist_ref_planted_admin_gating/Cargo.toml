@@ -1,0 +1,20 @@
+[workspace]
+members = [
+    "programs/tip-distribution",
+    "programs/vote-state",
+]
+resolver = "2"
+
+# Matches cf-invariants-anchor/Cargo.toml release profile (also matches the
+# jito-foundation upstream mev-programs/Cargo.toml release profile shape).
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+opt-level = 3
+incremental = false
+
+[profile.release.build-override]
+opt-level = 3
+incremental = false
+codegen-units = 1

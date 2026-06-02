@@ -1,0 +1,49 @@
+[package]
+name = "jito-tip-distribution"
+version = "0.1.10"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["Jito Network <team@jito.network>"]
+homepage = "https://jito.network"
+repository = "https://github.com/jito-foundation/jito-programs"
+description = "Tip distribution program, responsible for distributing funds to entitled parties."
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "jito_tip_distribution"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+custom-heap = []
+custom-panic = []
+default = []
+idl-build = ["anchor-lang/idl-build"]
+anchor-debug = ["anchor-lang/anchor-debug"]
+mainnet = []
+
+# Pinned to cf-invariants-anchor's CI-green stack:
+# anchor-lang 1.0.1 (matches Crucible v0.2.0 workspace).
+# solana-program is supplied transitively via anchor-lang 1.0.1's modular
+# solana-3.x interfaces; we drop the upstream direct `solana-program = "2.2"`
+# pin (recon §4.1 plan).
+[dependencies]
+# PLANTED BUG (cf-invariants-jito Phase-2, no_double_claim class):
+# opt into anchor-lang's `init-if-needed` feature so the planted twin's
+# Claim accounts struct can use `init_if_needed` (instead of `init`) and
+# silently accept a pre-existing ClaimStatus PDA on the second claim
+# attempt — sidestepping Anchor's "account already in use" account-
+# validation defense. With the runtime `is_claimed` gate also dropped
+# (see lib.rs::claim), the second call goes through and double-debits
+# the TDA. The fixture asserts this via `invariant_no_double_claim`.
+anchor-lang = { version = "=1.0.1", features = ["init-if-needed"] }
+jito-programs-vote-state = { path = "../vote-state", version = "=0.1.10" }
+# The modular replacement for the old `solana_program::hash` module that
+# anchor-lang 1.0.1's `solana_program` shim no longer re-exports. Used by the
+# claim instruction's merkle-leaf hash + merkle_proof::verify. solana-program
+# 3.x's `hash` module is itself just a re-export of this crate, so we depend on
+# it directly to keep the tree minimal and avoid pulling solana-program 3.x.
+solana-sha256-hasher = "3"
+solana-security-txt = "1.1.1"

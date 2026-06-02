@@ -1,0 +1,29 @@
+[package]
+name = "jito_claim_conservation_fuzz"
+version = "0.1.0"
+edition = "2021"
+description = "Crucible fuzz harness for jito_tipdist_ref — claim_amount_conservation invariant on claim."
+license = "Apache-2.0"
+
+[workspace]
+
+[dependencies]
+crucible-fuzzer       = { path = "../../../../../crucible/crates/crucible-fuzzer" }
+crucible-test-context = { path = "../../../../../crucible/crates/crucible-test-context" }
+anchor-lang = "=1.0.1"
+arbitrary = { version = "1", features = ["derive"] }
+ctrlc = "3.4"
+libafl = { version = "0.15.1", features = ["std", "cli", "prelude"] }
+libafl_bolts = { version = "0.15.1", features = ["std"] }
+jito-tip-distribution = { path = "../../programs/tip-distribution", features = ["no-entrypoint"] }
+solana-keypair = "3.0"
+solana-pubkey = "3.0"
+solana-signer = "3.0"
+solana-sha256-hasher = "3"
+
+[[bin]]
+name = "invariant_test"
+path = "src/main.rs"
+
+[features]
+invariant_claim_amount_conservation = []
