@@ -1,0 +1,16 @@
+{
+  "test_name": "invariant_update_config_requires_authority",
+  "timestamp": "2026-06-02T23:20:24Z",
+  "iteration": 7015,
+  "seed": 1780442416273254000,
+  "actions": [
+    {
+      "name": "attack_update_config",
+      "params": {
+        "new_max_validator_commission_bps": 1,
+        "new_num_epochs_valid": 1
+      },
+      "success": true
+    }
+  ]
+}

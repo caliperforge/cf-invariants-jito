@@ -133,23 +133,41 @@ impl TipDistributionAccount {
 
     fn transfer_lamports(from: AccountInfo, to: AccountInfo, amount: u64) -> Result<()> {
         // PLANTED BUG (cf-invariants-jito Phase-2, claim_amount_conservation
-        // class): debit by `amount + 1` while crediting by `amount`. One
-        // lamport per claim "drains" into accounting limbo — the on-chain
-        // `merkle_root.total_funds_claimed` bookkeeping tracks the requested
-        // amount but the TDA balance leaks an extra lamport per call. This
-        // is the Solana analog of the kamino_lending_ref share-price-drift
-        // plant. Caught by `invariant_claim_amount_conservation` in the
-        // Crucible fixture (fixture-side ledger: tda_expected.lamports -=
-        // amount and claimant_expected.lamports += amount).
+        // class): debit `from` by `amount + 1` AND credit `to` by `amount + 1`.
+        // Both off-by-one in the SAME direction — total lamports across the
+        // two accounts is preserved, so the Solana runtime's per-instruction
+        // lamport-conservation check (`UnbalancedInstruction`) is NOT tripped
+        // and the buggy claim commits to chain. The on-chain `merkle_root
+        // .total_funds_claimed` bookkeeping still records the requested
+        // `amount`, so the claimant is OVER-paid by 1 lamport per call
+        // (silent drift between claim_status.amount + total_funds_claimed
+        // accounting and the real on-chain claimant balance). This is the
+        // Solana analog of the kamino_lending_ref share-price-drift plant.
+        //
+        // NB: a naive off-by-one debit ONLY (debit amount+1, credit amount)
+        // would be caught by the Solana runtime's UnbalancedInstruction
+        // check before the tx commits — the runtime enforces that
+        // sum(account.lamports) is invariant across an instruction's
+        // execution. So the planted bug must conserve total lamports to
+        // observably reach state; the over-credit is the smallest shape
+        // that does so.
+        //
+        // Caught by `invariant_claim_amount_conservation` in the Crucible
+        // fixture (fixture-side ledger: tda_expected.lamports -= amount and
+        // claimant_expected.lamports += amount; on-chain claimant balance
+        // diverges by +1 per successful claim).
         let bug_amount = amount.checked_add(1).ok_or(ArithmeticError)?;
         // debit lamports (planted: off-by-one)
         **from.try_borrow_mut_lamports()? = from
             .lamports()
             .checked_sub(bug_amount)
             .ok_or(ArithmeticError)?;
-        // credit lamports (correct amount — drift is silent on the receiver side)
-        **to.try_borrow_mut_lamports()? =
-            to.lamports().checked_add(amount).ok_or(ArithmeticError)?;
+        // credit lamports (planted: off-by-one — keeps the instruction
+        // lamport-balanced so it commits)
+        **to.try_borrow_mut_lamports()? = to
+            .lamports()
+            .checked_add(bug_amount)
+            .ok_or(ArithmeticError)?;
 
         Ok(())
     }

@@ -104,6 +104,16 @@ impl JitoNoDoubleClaimFixture {
             .owner(system_program::ID)
             .create()
             .unwrap();
+        // Fund the merkle_root_upload_authority — it's the first signer
+        // (= SVM fee payer). Without an on-chain account the tx fails
+        // with AccountNotFound before the program ever runs (see CI run
+        // 26850577144 0-coverage diagnosis).
+        ctx.create_account()
+            .pubkey(merkle_root_upload_authority.pubkey())
+            .lamports(INITIAL_BALANCE)
+            .owner(system_program::ID)
+            .create()
+            .unwrap();
 
         // Single-leaf merkle tree for (claimant, CLAIM_AMOUNT).
         let inner_hash = hashv(&[

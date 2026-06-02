@@ -1,0 +1,15 @@
+{
+  "test_name": "invariant_merkle_proof_required",
+  "timestamp": "2026-06-02T23:20:10Z",
+  "iteration": 7566,
+  "seed": 1780442400017905000,
+  "actions": [
+    {
+      "name": "attack_claim_with_empty_proof",
+      "params": {
+        "amount": 582535722
+      },
+      "success": true
+    }
+  ]
+}

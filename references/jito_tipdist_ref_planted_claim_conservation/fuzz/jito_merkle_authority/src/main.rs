@@ -96,6 +96,17 @@ impl JitoMerkleAuthorityFixture {
             .owner(system_program::ID)
             .create()
             .unwrap();
+        // Fund the merkle_root_upload_authority — it's the first signer on
+        // every attacker claim, which makes it the SVM-default fee payer.
+        // A fee payer with no on-chain account fails the tx with
+        // AccountNotFound BEFORE the program runs → 0 edge coverage (the
+        // bug observed in CI run 26850577144).
+        ctx.create_account()
+            .pubkey(merkle_root_upload_authority.pubkey())
+            .lamports(INITIAL_BALANCE)
+            .owner(system_program::ID)
+            .create()
+            .unwrap();
 
         // The legitimate claimant — only THIS pubkey's leaf is committed
         // in the merkle root. The fixture never claims for this claimant

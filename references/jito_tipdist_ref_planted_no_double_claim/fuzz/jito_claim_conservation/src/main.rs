@@ -117,7 +117,12 @@ impl JitoClaimConservationFixture {
         let claimant = Rc::new(Keypair::new());
         let payer = Rc::new(Keypair::new());
 
-        // Fund the payer (writes ClaimStatus rent) and claimant.
+        // Fund the payer (writes ClaimStatus rent), claimant (receives the
+        // transferred lamports), AND the merkle_root_upload_authority (it
+        // signs the tx as the first signer → it's the SVM fee payer, and a
+        // fee payer that doesn't exist on-chain hard-fails the tx with
+        // AccountNotFound BEFORE any program code runs — explaining the
+        // 0% edge coverage in CI run 26850577144).
         ctx.create_account()
             .pubkey(payer.pubkey())
             .lamports(INITIAL_BALANCE)
@@ -126,6 +131,12 @@ impl JitoClaimConservationFixture {
             .unwrap();
         ctx.create_account()
             .pubkey(claimant.pubkey())
+            .lamports(INITIAL_BALANCE)
+            .owner(system_program::ID)
+            .create()
+            .unwrap();
+        ctx.create_account()
+            .pubkey(merkle_root_upload_authority.pubkey())
             .lamports(INITIAL_BALANCE)
             .owner(system_program::ID)
             .create()

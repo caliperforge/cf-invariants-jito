@@ -1,0 +1,13 @@
+{
+  "test_name": "invariant_claim_amount_conservation",
+  "timestamp": "2026-06-02T23:19:41Z",
+  "iteration": 17991,
+  "seed": 1780442366450018000,
+  "actions": [
+    {
+      "name": "claim",
+      "params": {},
+      "success": true
+    }
+  ]
+}
