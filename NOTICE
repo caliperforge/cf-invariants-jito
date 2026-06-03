@@ -1,0 +1,51 @@
+cf-invariants-jito
+Copyright 2026 CaliperForge
+
+This product includes software developed by CaliperForge
+(https://caliperforge.com).
+
+------------------------------------------------------------------------
+Third-party attributions
+------------------------------------------------------------------------
+
+This repository includes modified copies of code originally distributed
+by the Jito Foundation as part of the `jito-foundation/jito-programs`
+project (https://github.com/jito-foundation/jito-programs), specifically
+the `tip-distribution` and `vote-state` programs.
+
+The upstream code is licensed under the Apache License, Version 2.0:
+
+    Copyright 2024 Jito Foundation
+    Licensed under the Apache License, Version 2.0.
+    https://github.com/jito-foundation/jito-programs
+
+Modifications relative to upstream
+----------------------------------
+
+1. `programs/` — a port of `jito-tip-distribution` from `anchor-lang`
+   `0.31.1` to `anchor-lang` `1.0.1` for use as the cf-invariants-jito
+   harness target. Build-system and dependency surfaces were updated to
+   the newer anchor-lang; program logic is preserved.
+
+2. `references/jito_tipdist_ref/` — a clean baseline copy of the upstream
+   `tip-distribution` program plus four Crucible fuzz fixtures
+   (`fuzz/jito_claim_conservation`, `fuzz/jito_no_double_claim`,
+   `fuzz/jito_merkle_authority`, `fuzz/jito_admin_gating`). The
+   fuzz-fixture sources are CaliperForge-authored harness code, not
+   upstream code.
+
+3. `references/jito_tipdist_ref_planted_*/` — four CaliperForge-authored
+   "planted-bug" variants of the clean reference. Each variant introduces
+   a small, deliberate logic regression into the tip-distribution program
+   source so the Crucible harness can prove the corresponding invariant
+   class fires (planted >= 1 violation) while the clean reference holds
+   (clean = 0 violations). The planted modifications are listed in
+   `README.md` and visible as diffs against `references/jito_tipdist_ref/`.
+
+All files derived from the Jito upstream remain under Apache License,
+Version 2.0. CaliperForge-authored files (harness, fuzz fixtures, CI,
+README, this NOTICE) are likewise licensed under Apache License,
+Version 2.0 per the LICENSE file at the repository root.
+
+The Jito Foundation does not endorse this project. This harness is
+maintained independently by CaliperForge.
