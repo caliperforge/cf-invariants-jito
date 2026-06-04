@@ -1,0 +1,19 @@
+name: Setup Rust + cargo cache
+description: >
+  Standard Rust toolchain + Swatinem cargo cache prelude used by every job in
+  this repo's ci.yml. Extracted to de-duplicate identical 3-step blocks; the
+  ci.yml audit (2026-06-04) flagged the repeat as S1.
+inputs:
+  workspaces:
+    description: 'Workspaces input for Swatinem/rust-cache@v2 (paths -> target dirs)'
+    required: false
+    default: '. -> target'
+runs:
+  using: composite
+  steps:
+    - name: Install Rust stable
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache cargo
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: ${{ inputs.workspaces }}
